@@ -12,24 +12,42 @@ function Add-PRTGEnvironmentTrust {
 "@
     [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 }
-
 function Set-PRTGServer {
-    [Param()]
-    $env:PRTGAuthentication = "username=api_access&passhash=1669687025"
-    $env:PRTGHost = "192.168.0.89"
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        $username="api_access",
+        [Parameter(Mandatory=$true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        $Hash,
+        [Parameter(Mandatory=$true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        $Server
+    )
+    $env:PRTGAuthenticationString = "username=$username&passhash=$Hash"
+    $env:PRTGHost = "$server"
 }
-
-# will return ALL sensors listed in PRTG, for a given Group (via its ID) (limited to 2500)
-#default is the root (ID=0)
-#its important to remember that a "Group" is also a device, and probe etc.
-#eg
-#Get-prtgSensorInGroup 8011
-function Get-PRTGSensorInGroup([string]$StartingID=0) {
-    $url = "http://$PRTGHost/api/table.xml?content=sensors&output=csvtable&columns=objid,probe,group,device,sensor,status,message,lastvalue,priority,favorite,tags&id=$StartingID&count=2500&$auth"
-    $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
-
-    convertFrom-csv $request -WarningAction SilentlyContinue
-} # end function
+function Get-PRTGSensorInGroup {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false,
+                   ValueFromPipeline=$true)]
+        [String]$GroupID=0,
+        [Parameter(Mandatory=$false)]
+        [String]$Count=2500
+    )
+    try {
+        $url = "http://$env:PRTGHost/api/table.xml?content=sensors&output=csvtable&columns=objid,probe,group,device,sensor,status,message,lastvalue,priority,favorite,tags&id=$GroupID&count=$Count&$env:PRTGAuthenticationString"
+        $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
+        convertFrom-csv $request -WarningAction SilentlyContinue
+    } catch {
+        throw $_
+    }
+}
 # will return ALL Devices listed in PRTG, for a given Group (via its ID) (limited to 2500)
 #default is the root (ID=0)
 #if you want to find 1 device(ID=8011), then use: Get-prtgDevicesInGroup | where {$_.ID -eq 8011}
