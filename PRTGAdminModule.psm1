@@ -1,5 +1,6 @@
 ######ignore invalid SSL Certs##########
-add-type @"
+function Add-PRTGEnvironmentTrust {
+    add-type @"
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
     public class TrustAllCertsPolicy : ICertificatePolicy {
@@ -10,13 +11,14 @@ add-type @"
         }
     }
 "@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+    [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+}
 
-######setup details, access related.
-$auth = "username=api_access&passhash=1669687025"
-$PRTGHost = "192.168.0.89"
-
-
+function Set-PRTGServer {
+    [Param()]
+    $env:PRTGAuthentication = "username=api_access&passhash=1669687025"
+    $env:PRTGHost = "192.168.0.89"
+}
 
 ##############################################
 ############Get-prtgSensorInGroup#############
@@ -27,7 +29,7 @@ $PRTGHost = "192.168.0.89"
 #eg
 #Get-prtgSensorInGroup 8011
 
-function Get-prtgSensorInGroup([string]$StartingID=0)
+function Get-PRTGSensorInGroup([string]$StartingID=0)
 {
     $url = "http://$PRTGHost/api/table.xml?content=sensors&output=csvtable&columns=objid,probe,group,device,sensor,status,message,lastvalue,priority,favorite,tags&id=$StartingID&count=2500&$auth"
     $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
@@ -50,7 +52,7 @@ function Get-prtgSensorInGroup([string]$StartingID=0)
 #you may also want to return many devices, eg
 #Get-prtgDevicesInGroup | where {$_.host -like "10.81.8.*"}
 
-function Get-prtgDevicesInGroup ([string]$StartingID=0)
+function Get-PRTGDevicesInGroup ([string]$StartingID=0)
 {
     #if ($script:devicesCached -eq $false){
         $url = "http://$PRTGHost/api/table.xml?content=devices&output=csvtable&columns=objid,probe,groupid,device,host,downsens,partialdownsens,downacksens,upsens,warnsens,pausedsens,unusualsens,undefinedsens,tags,comments&id=$StartingID&count=2500&$auth"
@@ -77,7 +79,7 @@ function Get-prtgDevicesInGroup ([string]$StartingID=0)
 #eg, return al lthe groups in the local probe
 # get-prtgGroupsInGroup 1
 
-function get-prtgGroupsInGroup ([string]$StartingID=0)
+function Get-PRTGGroupsInGroup ([string]$StartingID=0)
 {
    
     $url = "http://$PRTGHost/api/table.xml?content=groups&output=csvtable&columns=objid,probe,group,name,downsens,partialdownsens,downacksens,upsens,warnsens,pausedsens,unusualsens,undefinedsens&count=2500&id=$StartingID&$auth"
@@ -95,7 +97,7 @@ function get-prtgGroupsInGroup ([string]$StartingID=0)
 ##############################################
 # Sets a property of a device
 
-function Set-prtgDeviceProperty ([string]$DeviceID,[string]$PropertyName,[string]$Value)
+function Set-PRTGDeviceProperty ([string]$DeviceID,[string]$PropertyName,[string]$Value)
 {
     $url = "http://$PRTGHost/api/setobjectproperty.htm?id=$DeviceID&name=$PropertyName&value=$Value&$auth"
     $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
@@ -109,7 +111,7 @@ function Set-prtgDeviceProperty ([string]$DeviceID,[string]$PropertyName,[string
 ############Get-prtgSensorChannels############
 ##############################################
 
-function Get-prtgSensorChannels ([string]$SensorID)
+function Get-PRTGSensorChannels ([string]$SensorID)
 {
     #this does not retuen the channelID - rather important for somethings.
     $url = "http://$PRTGHost/api/table.xml?content=channels&output=csvtable&columns=name,lastvalue_&id=$SensorID&$auth"
@@ -119,7 +121,7 @@ function Get-prtgSensorChannels ([string]$SensorID)
     
 } # end function
 
-function Get-prtgSensorChannelIDs ([string]$SensorID)
+function Get-PRTGSensorChannelIDs ([string]$SensorID)
 {
     #this does retuen the channelID - but not the last value
     $url = "http://$PRTGHost/controls/channeledit.htm?_hjax=true&id=$SensorID&$auth"
@@ -146,7 +148,7 @@ function Get-prtgSensorChannelIDs ([string]$SensorID)
 ##############Get-prtgSensorData##############
 ##############################################
 
-function Get-prtgSensorData ([string]$SensorID,[datetime]$StartDate,[datetime]$EndDate)
+function Get-PRTGSensorData ([string]$SensorID,[datetime]$StartDate,[datetime]$EndDate)
 {
     $StartDate2 = get-date $StartDate -format "yyyy-MM-dd-hh-mm-ss"
     $EndDate2 = get-date $EndDate -format "yyyy-MM-dd-hh-mm-ss"
@@ -163,7 +165,7 @@ function Get-prtgSensorData ([string]$SensorID,[datetime]$StartDate,[datetime]$E
 #######Get-prtgSensorChannelPrediction########
 ##############################################
 
-function Get-prtgSensorChannelPrediction ($SensorID,$ChannelName,$AgeOfFirstSampleInDays,$Limit,[bool]$Debug)
+function Get-PRTGSensorChannelPrediction ($SensorID,$ChannelName,$AgeOfFirstSampleInDays,$Limit,[bool]$Debug)
 {
     $NewDate = [DateTime]::Now.Subtract([TimeSpan]::FromDays($AgeOfFirstSampleInDays)) 
     $NewDate = get-date $NewDate -format "yyyy-MM-dd hh:mm:ss"
@@ -222,7 +224,7 @@ function Get-prtgSensorChannelPrediction ($SensorID,$ChannelName,$AgeOfFirstSamp
 ##############################################
 # Gets a property of a device
 
-function Get-prtgDeviceProperty ([string]$DeviceID,[string]$PropertyName)
+function Get-PRTGDeviceProperty ([string]$DeviceID,[string]$PropertyName)
 {
     $url = "http://$PRTGHost/api/getobjectproperty.htm?id=$DeviceID&name=$PropertyName&$auth"
     [xml]$request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
@@ -247,10 +249,8 @@ function Get-prtgDeviceProperty ([string]$DeviceID,[string]$PropertyName)
 #eg add a pages_left sensor to all devices with a tag of "printer"
 #TODO
 
-function Add-prtgSensorToDevice
-{
+function Add-PRTGSensorToDevice {
     [CmdletBinding()]
-    
     param(
             [Parameter(Mandatory=$False,ValueFromPipelineByPropertyName=$false)]
             [scriptblock]$DevicesScriptBlock,
@@ -369,11 +369,8 @@ function Add-prtgSensorToDevice2
 #example, import from CSV. where the fields are newip, TemplateID, DestGroupID, NewDeviceName
 #Import-Csv -Delimiter "`t" -path c:\prtgimport.csv | Add-prtgDevice
 
-function Add-prtgDevice 
-{
- 
+function Add-PRTGDevice {
     [CmdletBinding()]
-    
     param(
             [Parameter(Mandatory=$True,ValueFromPipelineByPropertyName=$true)]
             [string]$NewIP,
@@ -531,7 +528,7 @@ function Set-PRTGAdvancedSchedules{
 
 #example:
 #Set-PRTGObjectPause -ObjectID 2003 -Minutes 5 -Message "Please Wait - Server Rebooting"
-function Set-PRTGObjectPause{
+function Suspend-PRTGObject{
     param
     (
     $ObjectID,
@@ -549,7 +546,7 @@ function Set-PRTGObjectPause{
 ##############################################
 
 ####unpause!
-function Set-PRTGObjectResume{
+function Resume-PRTGObject{
     param
     (
     $ObjectID
@@ -560,7 +557,7 @@ function Set-PRTGObjectResume{
 
 }
 
-function Set-PRTGPauseThisServer{
+function Suspend-PRTGServer {
     param
     (
     $Message,
@@ -588,7 +585,7 @@ function Set-PRTGPauseThisServer{
 }
 
 
-function Set-PRTGResumeThisServer{
+function Resume-PRTGServer {
     $myIPs = Get-NetIPAddress -AddressFamily IPv4 | where { $_.InterfaceAlias -notmatch 'Loopback'} |Select IPAddress
     
     $t = "" | select ipaddress 
@@ -611,8 +608,8 @@ function Set-PRTGResumeThisServer{
     }
 }
 
-function Get-PRTGChannelDetailExportForDevices
-{
+#previously named Get-PRTGChannelDetailExportForDevices
+function Export-PRTGChannelDetail {
     param
     (
     $ObjectID
