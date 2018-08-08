@@ -62,3 +62,12 @@ PS> Add-PRTGEnvironmentTrust
 
 
 ## <a name=version>Versions and Updates</a>
+
+### Version 0.1.0
+
+In version 0.1.0 the following changed:
+* Version forked from [AndrewG-1234/PRTG](https://github.com/AndrewG-1234/PRTG)
+* Module split to public/private functions
+* Function structure changed for reliability/ease of debugging
+* Unit tests folder added
+* External help created
