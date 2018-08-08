@@ -23,7 +23,7 @@ Import-Module PRTG
 Once Imported, the module will then need to be configured for your PRTG Environment.  You'll need to specify the PRTG server, and if you're using a self signed certificate for SSL, you'll need to add an exception for it.  To this effect, you have two cmdlets you can use.
 
 ```PowerShell
-PS> Set-PRTGServer -PasswordHash "XXXXXXXXXX" -Server "10.0.0.1"
+PS> Set-PRTGServer -UserName "api_access" -Hash "XXXXXXXXXX" -Server "10.0.0.1"
 PS> Add-PRTGEnvironmentTrust
 ```
 
