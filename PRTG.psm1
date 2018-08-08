@@ -1,3 +1,20 @@
+function New-PRTGApiCall {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false)]
+        [ValidateNotNullOrEmpty()]
+        $auth=$env:PRTGAuthenticationString,
+        [Parameter(Mandatory=$false)]
+        [ValidateNotNullOrEmpty()]
+        $server=$env:PRTGHost,
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        $query
+    )
+    $response = "https://$server/api/$query&$auth"
+    return $response
+}
+
 function Add-PRTGEnvironmentTrust {
     add-type @"
     using System.Net;
@@ -35,39 +52,48 @@ function Get-PRTGSensorInGroup {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$false,
-                   ValueFromPipeline=$true)]
-        [String]$GroupID=0,
-        [Parameter(Mandatory=$false)]
-        [String]$Count=2500
+                   ValueFromPipeLine=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [string]$GroupID=0,
+        [Parameter(Mandatory=$false,
+                   ValueFromPipeLine=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Count=2500
     )
     try {
-        $url = "http://$env:PRTGHost/api/table.xml?content=sensors&output=csvtable&columns=objid,probe,group,device,sensor,status,message,lastvalue,priority,favorite,tags&id=$GroupID&count=$Count&$env:PRTGAuthenticationString"
+        $query = "table.xml?content=sensors&output=csvtable&columns=objid,probe,group,device,sensor,status,message,lastvalue,priority,favorite,tags&id=$GroupID&count=$Count"
+        $url = New-PRTGApiCall -query $query
         $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
-        convertFrom-csv $request -WarningAction SilentlyContinue
+        $response = ConvertFrom-CSV $request -WarningAction SilentlyContinue
+        return $response
     } catch {
         throw $_
     }
 }
-# will return ALL Devices listed in PRTG, for a given Group (via its ID) (limited to 2500)
-#default is the root (ID=0)
-#if you want to find 1 device(ID=8011), then use: Get-prtgDevicesInGroup | where {$_.ID -eq 8011}
-#anther example, seaching for an IP
-#Get-prtgDevicesInGroup | where {$_.host -eq "10.81.8.36"}
-#you may also want to return many devices, eg
-#Get-prtgDevicesInGroup | where {$_.host -like "10.81.8.*"}
-function Get-PRTGDevicesInGroup ([string]$StartingID=0) {
-    #if ($script:devicesCached -eq $false){
-        $url = "http://$PRTGHost/api/table.xml?content=devices&output=csvtable&columns=objid,probe,groupid,device,host,downsens,partialdownsens,downacksens,upsens,warnsens,pausedsens,unusualsens,undefinedsens,tags,comments&id=$StartingID&count=2500&$auth"
+function Get-PRTGDevicesInGroup {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false,
+                   ValueFromPipeLine=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [string]$GroupID=0,
+        [Parameter(Mandatory=$false,
+                   ValueFromPipeLine=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Count=2500
+    )
+    try {
+        $query = "table.xml?content=devices&output=csvtable&columns=objid,probe,groupid,device,host,downsens,partialdownsens,downacksens,upsens,warnsens,pausedsens,unusualsens,undefinedsens,tags,comments&id=$GroupID&count=$Count&"
+        $url = New-PRTGApiCall -query $query
         $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
-        $getprtgDeviceRet = convertFrom-csv ($request.content) -WarningAction SilentlyContinue
-        $getprtgDeviceRet 
-    #    write-host "got devices from website..."
-    #    $script:devicesCached = $true
-    #}else{
-    #    write-host "got groups from cache..."
-    #    $getprtgDeviceRet 
-    #}
-} # end function
+        $response = convertFrom-csv ($request.content) -WarningAction SilentlyContinue
+        return $response
+    } catch {
+        throw $_
+    }
+}
 # will return ALL Groups listed in PRTG, for a given Group (via its ID) (limited to 2500)
 #default is the root (ID=0)
 #will will list all the group recurively under the listed group (ie, not JUST the children)

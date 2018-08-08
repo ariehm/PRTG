@@ -8,30 +8,30 @@ schema: 2.0.0
 # Get-PRTGDevicesInGroup
 
 ## SYNOPSIS
-{{Fill in the Synopsis}}
+{{Returns all devices (limiited to 2,500) listed in PRTG for a given group via the Group ID.}}
 
 ## SYNTAX
 
 ```
-Get-PRTGDevicesInGroup [[-StartingID] <String>] [<CommonParameters>]
+Get-PRTGDevicesInGroup [-GroupID <String>] [-Count <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{Fill in the Description}}
+{{Returns all devices (limiited to 2,500) listed in PRTG for a given group via the Group ID.  The default group is the root group (ID=0).  It is important to remember that in PRTG a group can also be a device, probe, etc.}}
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> {{ Get-PRTGDevicesInGroup -GroupID "8001"}}
 ```
 
-{{ Add example description here }}
+{{ By specifying the starting ID of "8001", we will get all PRTG devices that belong to that group's ID. }}
 
 ## PARAMETERS
 
-### -StartingID
-{{Fill StartingID Description}}
+### -Count
+{{Number of returned results.  Maximum is 2500, which is the default.}}
 
 ```yaml
 Type: String
@@ -39,9 +39,24 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 0
+Position: Named
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -GroupID
+{{The ID of the group to query the sensors of.}}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 

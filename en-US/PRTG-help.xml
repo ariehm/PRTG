@@ -756,19 +756,31 @@
       <command:verb>Get</command:verb>
       <command:noun>PRTGDevicesInGroup</command:noun>
       <maml:description>
-        <maml:para>{{Fill in the Synopsis}}</maml:para>
+        <maml:para>{{Returns all devices (limiited to 2,500) listed in PRTG for a given group via the Group ID.}}</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{Fill in the Description}}</maml:para>
+      <maml:para>{{Returns all devices (limiited to 2,500) listed in PRTG for a given group via the Group ID.  The default group is the root group (ID=0).  It is important to remember that in PRTG a group can also be a device, probe, etc.}}</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-PRTGDevicesInGroup</maml:name>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
-          <maml:name>StartingID</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
+          <maml:name>Count</maml:name>
           <maml:Description>
-            <maml:para>{{Fill StartingID Description}}</maml:para>
+            <maml:para>{{Number of returned results.  Maximum is 2500, which is the default.}}</maml:para>
+          </maml:Description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
+          <maml:name>GroupID</maml:name>
+          <maml:Description>
+            <maml:para>{{The ID of the group to query the sensors of.}}</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -780,10 +792,22 @@
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
-        <maml:name>StartingID</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
+        <maml:name>Count</maml:name>
         <maml:Description>
-          <maml:para>{{Fill StartingID Description}}</maml:para>
+          <maml:para>{{Number of returned results.  Maximum is 2500, which is the default.}}</maml:para>
+        </maml:Description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
+        <maml:name>GroupID</maml:name>
+        <maml:Description>
+          <maml:para>{{The ID of the group to query the sensors of.}}</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -821,9 +845,9 @@
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>PS C:\&gt; {{ Get-PRTGDevicesInGroup -GroupID "8001"}}</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>{{ By specifying the starting ID of "8001", we will get all PRTG devices that belong to that group's ID. }}</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1383,10 +1407,10 @@
     <command:syntax>
       <command:syntaxItem>
         <maml:name>Get-PRTGSensorInGroup</maml:name>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
           <maml:name>Count</maml:name>
           <maml:Description>
-            <maml:para>{{Number of returned results.  Maximum is 2500}}</maml:para>
+            <maml:para>{{Number of returned results.  Maximum is 2500, which is the default.}}</maml:para>
           </maml:Description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -1395,7 +1419,7 @@
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="named" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
           <maml:name>GroupID</maml:name>
           <maml:Description>
             <maml:para>{{The ID of the group to query the sensors of.}}</maml:para>
@@ -1410,10 +1434,10 @@
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
         <maml:name>Count</maml:name>
         <maml:Description>
-          <maml:para>{{Number of returned results.  Maximum is 2500}}</maml:para>
+          <maml:para>{{Number of returned results.  Maximum is 2500, which is the default.}}</maml:para>
         </maml:Description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -1422,7 +1446,7 @@
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="named" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
         <maml:name>GroupID</maml:name>
         <maml:Description>
           <maml:para>{{The ID of the group to query the sensors of.}}</maml:para>
