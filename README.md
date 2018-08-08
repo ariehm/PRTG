@@ -55,6 +55,8 @@ PS> Add-PRTGEnvironmentTrust
 
 ### Private functions
 
+* New-PRTGApiCall
+
 
 ## <a name=usage>Usage Examples</a>
 
