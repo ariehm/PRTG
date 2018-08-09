@@ -93,24 +93,54 @@ function Get-PRTGDevicesInGroup {
         throw $_
     }
 }
-# will return ALL Groups listed in PRTG, for a given Group (via its ID) (limited to 2500)
-#default is the root (ID=0)
-#will will list all the group recurively under the listed group (ie, not JUST the children)
-#eg, return al lthe groups in the local probe
-# get-prtgGroupsInGroup 1
-function Get-PRTGGroupsInGroup ([string]$StartingID=0) {
-    $url = "http://$PRTGHost/api/table.xml?content=groups&output=csvtable&columns=objid,probe,group,name,downsens,partialdownsens,downacksens,upsens,warnsens,pausedsens,unusualsens,undefinedsens&count=2500&id=$StartingID&$auth"
-    $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
-    $getprtgGroupret = convertFrom-csv ($request) -WarningAction SilentlyContinue
-    #write-host "got groups from website..."
-    $getprtgGroupret
-   
-} # end function
-# Sets a property of a device
-function Set-PRTGDeviceProperty ([string]$DeviceID,[string]$PropertyName,[string]$Value) {
-    $url = "http://$PRTGHost/api/setobjectproperty.htm?id=$DeviceID&name=$PropertyName&value=$Value&$auth"
-    $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
-} # end function
+function Get-PRTGGroupsInGroup {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false,
+                   ValueFromPipeLine=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [string]$GroupID=0,
+        [Parameter(Mandatory=$false,
+                   ValueFromPipeLine=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Count=2500
+    )
+    try {
+        $query = "table.xml?content=groups&output=csvtable&columns=objid,probe,group,name,downsens,partialdownsens,downacksens,upsens,warnsens,pausedsens,unusualsens,undefinedsens&count=$Count&id=$GroupID"
+        $url = New-PRTGApiCall -query $query
+        $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
+        $response = ConvertFrom-Csv ($request.content) -WarningAction SilentlyContinue
+        return $response
+    } catch {
+        throw $_
+    }
+} 
+function Set-PRTGDeviceProperty {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [string]$DeviceID,
+        [Parameter(Mandatory=$true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [string]$Property,
+        [Parameter(Mandatory=$true,
+                   ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true)]
+        [string]$Value
+    )
+    try {
+        $query = "setobjectproperty.htm?id=$DeviceID&name=$Property&value=$Value"
+        $url = New-PRTGApiCall -query $query
+        $request = Invoke-WebRequest -Uri $url -MaximumRedirection 0 -ErrorAction Ignore
+        return $request
+    } catch {
+        throw $_
+    }
+}
 function Get-PRTGSensorChannels ([string]$SensorID) {
     #this does not retuen the channelID - rather important for somethings.
     $url = "http://$PRTGHost/api/table.xml?content=channels&output=csvtable&columns=name,lastvalue_&id=$SensorID&$auth"
