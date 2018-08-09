@@ -14,7 +14,6 @@ function New-PRTGApiCall {
     $response = "https://$server/api/$query&$auth"
     return $response
 }
-
 function Add-PRTGEnvironmentTrust {
     add-type @"
     using System.Net;
